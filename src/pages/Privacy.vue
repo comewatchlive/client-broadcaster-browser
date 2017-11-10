@@ -1,5 +1,5 @@
 <template>
   <div>
-    <h1>Watch</h1>
+    <h1>Privacy</h1>
   </div>
 </template>

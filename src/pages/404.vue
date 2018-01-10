@@ -1,5 +1,5 @@
 <template>
   <div>
-    <h1>Watch</h1>
+    <h1>Not Found</h1>
   </div>
 </template>

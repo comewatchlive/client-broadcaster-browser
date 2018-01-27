@@ -11,14 +11,14 @@
         <a href="#" @click="logout">Logout</a>
       </div>
       <div v-if="!isLoggedIn && !isPage('/login')">
-        <router-link to="/login">Login</router-link>
+        <router-link to="/login" @click.prevent>Login</router-link>
       </div>
 
       <div v-if="isPage('/')">
 
         <show-manager></show-manager>
 
-        <div v-if="!broadcasterOffline">
+        <div v-if="!offline">
           <strong>{{viewers}} Viewers</strong>
         </div>
 
@@ -26,8 +26,6 @@
           {{broadcaster.xp}} XP
         </div>
       </div>
-
-
     </nav>
   </header>
 </template>
@@ -56,21 +54,22 @@
       ShowManager
     },
     computed: {
-      ...mapGetters([
-        'broadcaster',
-        'broadcasterOffline',
-        'currentRoom',
-        'isLoggedIn',
-        'user',
-        'viewers'
-      ])
+      ...mapGetters({
+        broadcaster: 'broadcaster',
+        isLoggedIn: 'isLoggedIn',
+        offline: 'chat/offline',
+        user: 'user',
+        viewers: 'chat/viewers'
+
+      })
     },
     methods: {
       logout: function () {
         let url = api.getURL() + '/logout/' + this.user.username
         this.$http.get(url).then((res) => {
           if (res.data.success) {
-            this.$store.commit('resetUser')
+            this.$store.commit('user/reset')
+            this.$store.commit('broadcaster/reset')
             this.$localStorage.remove('user')
             this.$router.push('/login')
           }

@@ -12,11 +12,11 @@
   import { mapActions, mapGetters } from 'vuex'
   export default {
     computed: {
-      ...mapGetters([
-        'broadcaster',
-        'chat',
-        'currentRoom'
-      ])
+      ...mapGetters({
+        broadcaster: 'broadcaster',
+        chat: 'chat',
+        currentRoom: 'chat/currentRoom'
+      })
     },
     created () {
       this.reset()

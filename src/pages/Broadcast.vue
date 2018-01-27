@@ -1,23 +1,21 @@
 <template>
   <div>
-    <debugbox></debugbox>
-    <div class="flex" v-if="isInShow">
-      <div>
-        <div class="video-box"></div>
-      </div>
-      <div>
-        <chat-box></chat-box>
-      </div>
-      <div>
-      <div  v-if="currentRoom">
-        <p>
+    <div v-if="isInShow">
+      <div v-if="currentRoom" class="flex">
+        <div>
           <topic-manager></topic-manager>
-        </p>
-        <p>
-          <strong>Tags:</strong>
-          <input-tag :on-change="updateTags" :tags="currentRoom.tags" placeholder="Type Here"/>
-        </p>
+        </div>
+        <div class="tags-wrapper">
+          <input-tag :on-change="updateTags" :tags="currentRoom.tags" placeholder="Type Tags Here" class="form-control"/>
+        </div>
       </div>
+      <div class="flex">
+        <div>
+          <div class="video-box"></div>
+        </div>
+        <div>
+          <chat-box></chat-box>
+        </div>
       </div>
     </div>
   </div>
@@ -31,8 +29,10 @@
   import Debugbox from '../components/Debug'
   import { mapGetters } from 'vuex'
   import {api} from '../config'
+  import timer from '../utils/timer'
 
   export default {
+    mixins: [timer],
     components: {
       BroadcasterTagList,
       ChatBox,
@@ -59,21 +59,24 @@
         }
       },
       updateViewers (data) {
+        console.log('update viewers', data, this.chat)
         this.$store.commit('updateViewers', data)
       }
     },
     computed: {
-      ...mapGetters([
-        'broadcaster',
-        'brodcasterAway',
-        'brodcasterOffline',
-        'broadcasterPublic',
-        'chat',
-        'currentRoom',
-        'isInShow',
-        'user',
-        'viewers'
-      ]),
+      ...mapGetters({
+        away: 'chat/away',
+        broadcaster: 'broadcaster',
+        chat: 'chat',
+        currentRoom: 'chat/currentRoom',
+        currentStatus: 'chat/currentStatus',
+        isInShow: 'chat/isInShow',
+        isLoggedIn: 'isLoggedIn',
+        offline: 'chat/offline',
+        public: 'chat/public',
+        user: 'user',
+        viewers: 'chat/viewers'
+      }),
       brodcasterPrivate () {
         return this.broadcaster.status === 'private'
       },
@@ -83,11 +86,10 @@
     },
     methods: {
       initPage () {
-        console.log('broadcasterInit')
         this.$socket.emit('broadcasterInit', this.user.slug, (data) => {
-          console.log('broadcasterInit Return')
-          this.$store.commit('setBroadcaster', data.broadcaster)
-          this.$store.commit('removeChatRooms')
+          this.$store.commit('broadcaster/set', data.broadcaster)
+          this.$store.commit('chat/removeChatRooms')
+          this.timeoutSetup()
         })
       },
       updateBroadcaster (slug = this.$route.params.slug) {
@@ -98,7 +100,7 @@
       },
       updateBroadcasterSuccess (res) {
         let broadcaster = res.data.data
-        this.$store.commit('setBroadcaster', broadcaster)
+        this.$store.commit('broadcaster/set', broadcaster)
         this.updateChatRoom(broadcaster.slug)
       },
       updateChatRoom (slug = this.$route.params.slug, room = this.broadcaster.status) {
@@ -111,7 +113,7 @@
         let room = res.data.data.room
         room.messages = res.data.data.messages
         let user = { slug: this.user.slug, username: this.user.username }
-        this.$store.commit('setPublicChatRoom', room)
+        this.$store.commit('chat/setPublicChatRoom', room)
         this.$socket.emit('joinRoom', room, user)
       },
       updateTags (tags) {
@@ -120,11 +122,26 @@
           tags
         }
         this.$socket.emit('updateTags', obj, (ret) => { return ret })
+      },
+
+      logout: function () {
+        let url = api.getURL() + '/logout/' + this.user.username
+        this.$http.get(url).then((res) => {
+          if (res.data.success) {
+            this.$store.commit('user/reset')
+            this.$store.commit('broadcaster/reset')
+            this.$localStorage.remove('user')
+            this.$router.push('/login')
+          }
+        })
       }
     }
   }
 </script>
 <style>
+  .tags-wrapper {
+    width: 400px;
+  }
   .video-box {
     background-color: #000;
     height: 400px;

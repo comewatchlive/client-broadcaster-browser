@@ -5,7 +5,7 @@
 <strong>broadcaster</strong>
 {{broadcaster | pretty}}
 <strong>room</strong>
-{{currentRoom | pretty}}
+        <span v-if="currentRoom">{{currentRoom | pretty}}</span>
 <strong>chat</strong>
 {{chat | pretty}}
     </pre>
@@ -15,12 +15,12 @@
   export default {
     name: 'debug-box',
     computed: {
-      ...mapGetters([
-        'broadcaster',
-        'chat',
-        'currentRoom',
-        'user'
-      ])
+      ...mapGetters({
+        broadcaster: 'broadcaster',
+        chat: 'chat',
+        currentRoom: 'chat/currentRoom',
+        user: 'user'
+      })
     },
     filters: {
       pretty: function (value) {

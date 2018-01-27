@@ -8,12 +8,13 @@ import VueLocalStorage from 'vue-localstorage'
 import {store} from './store'
 import VueSocketio from 'vue-socket.io'
 import {api} from './config'
+import Notifications from 'vue-notification'
 
+Vue.use(Notifications)
 Vue.config.productionTip = false
 Vue.use(VueResource)
 Vue.use(VueLocalStorage)
-console.log(' --- ' + api.getSocketURL() + ' --- ')
-Vue.use(VueSocketio, api.getSocketURL())
+Vue.use(VueSocketio, api.getSocketURL(), store)
 
 /* eslint-disable no-new */
 new Vue({
@@ -25,14 +26,9 @@ new Vue({
   beforeCreate () {
     let usr = JSON.parse(this.$localStorage.get('user'))
     if (usr) {
-      this.$store.commit('setUser', usr)
+      this.$store.commit('user/set', usr)
       this.$socket.emit('userMeta', {username: usr.username, slug: usr.slug})
       this.$localStorage.set('user', JSON.stringify(usr))
-    }
-  },
-  sockets: {
-    connect (d) {
-      console.log('SERVER Connected to Vlient', d)
     }
   },
   created () {
@@ -45,7 +41,7 @@ new Vue({
       this.$socket.emit('broadcasterUnload', { user, broadcaster })
     },
     commitUser (usr) {
-      this.$store.commit('setUser', usr)
+      this.$store.commit('user/set', usr)
       this.$socket.emit('userMeta', {username: usr.username, slug: usr.slug})
       this.$localStorage.set('user', JSON.stringify(usr))
     }

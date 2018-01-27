@@ -76,7 +76,7 @@
       },
       commitUser (usr) {
         this.loadSockets()
-        this.$store.commit('setUser', usr)
+        this.$store.commit('user/set', usr)
         this.$socket.emit('userMeta', {username: usr.username, slug: usr.slug})
         this.$localStorage.set('user', JSON.stringify(usr))
       },

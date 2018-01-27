@@ -1,11 +1,13 @@
 <template>
   <div id="app">
+    <notifications group="foo" />
     <main id="main">
       <header-global id="header-global"></header-global>
 
       <router-view/>
     </main>
     <footer-global id="footer-global"></footer-global>
+    <debug></debug>
   </div>
 </template>
 
@@ -13,15 +15,18 @@
 import Vue from 'vue'
 import FooterGlobal from './components/FooterGlobal.vue'
 import HeaderGlobal from './components/HeaderGlobal.vue'
+import Debug from './components/Debug'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
+import VueNotification from 'vue-notification'
+Vue.use(VueNotification)
 Vue.use(BootstrapVue)
 
 export default {
   name: 'app',
   components: {
+    Debug,
     FooterGlobal,
     HeaderGlobal
   }
